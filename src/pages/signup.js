@@ -10,7 +10,7 @@ const SignUpSignIn = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [login, setlogin ] = useState(false);
+  const [login, setlogin] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const validateForm = (name, email, password, confirmPassword) => {
@@ -85,90 +85,130 @@ const SignUpSignIn = () => {
     }
   };
 
-  function crateDoc(uid) {
+  const signInWithEmail = async (e) => {};
 
-  }
+  function crateDoc(uid) {}
 
   return (
     <>
       <Header></Header>
-      <div className="wrapper">
-        <div className="signup-signin-container">
-          <h2 style={{ textAlign: "center" }}>
-            Sign Up on <span className="blue-text">Financely.</span>
-          </h2>
-          <form onSubmit={signUpWithEmail}>
-            <div className="input-wrapper">
-              <p>Full Name</p>
-              <input
-                type="text"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <div className="input-wrapper">
-              <p>Email</p>
-              <input
-                type="email"
-                placeholder="JohnDoe@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
 
-            <div className="input-wrapper">
-              <p>Password</p>
-              <input
-                type="password"
-                placeholder="Example123"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+      {login ? (
+        <div className="wrapper">
+          <div className="signup-signin-container">
+            <h2 style={{ textAlign: "center" }}>
+              Sign In on <span className="blue-text">Financely.</span>
+            </h2>
+            <form onSubmit={signInWithEmail}>
+              <div className="input-wrapper">
+                <p>Email</p>
+                <input
+                  type="email"
+                  placeholder="JohnDoe@gmail.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
 
-            <div className="input-wrapper">
-              <p>Confirm Password</p>
-              <input
-                type="password"
-                placeholder="Example123"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
+              <div className="input-wrapper">
+                <p>Password</p>
+                <input
+                  type="password"
+                  placeholder="Example123"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
 
-            <button type="submit" className="btn">
-              {loading ? `loading...` : ` Sign In with Email and Password`}
-            </button>
-            <p style={{ textAlign: "center" }}>or</p>
-            <button disabled={loading} type="submit" className="btn">
-              {loading ? `loading...` : `  Sign Up with Google `}
-            </button>
-          </form>
-          {/* <p style={{ textAlign: "center", margin: 0 }}>or</p>
-           <button
-             disabled={loading}
-             className="btn btn-blue"
-             onClick={signInWithGoogle}
-           >
-             {loading ? "Loading..." : "Sign Up with Google"}
-           </button>
-           <p
-             onClick={() => setFlag(!flag)}
-             style={{
-               textAlign: "center",
-               marginBottom: 0,
-               marginTop: "0.5rem",
-               cursor: "pointer",
-             }}
-           >
-             Or Have An Account Already? Click Here
-           </p> */}
-          {/* <button onClick={signInWithEmail}>
-           Sign In with Email and Password
-         </button> */}
+              <button type="submit" className="btn">
+                {loading ? `loading...` : ` Sign In with Email and Password`}
+              </button>
+              <p style={{ textAlign: "center" }}>or</p>
+              <button disabled={loading} type="submit" className="btn">
+                {loading ? `loading...` : `  Sign In with Google `}
+              </button>
+            </form>
+            <p
+              onClick={() => setlogin(!login)}
+              style={{
+                textAlign: "center",
+                marginBottom: 0,
+                marginTop: "0.5rem",
+                cursor: "pointer",
+              }}
+            >
+              Don't have an account ? Click Here.
+            </p>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="wrapper">
+          <div className="signup-signin-container">
+            <h2 style={{ textAlign: "center" }}>
+              Sign Up on <span className="blue-text">Financely.</span>
+            </h2>
+            <form onSubmit={signUpWithEmail}>
+              <div className="input-wrapper">
+                <p>Full Name</p>
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <div className="input-wrapper">
+                <p>Email</p>
+                <input
+                  type="email"
+                  placeholder="JohnDoe@gmail.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="input-wrapper">
+                <p>Password</p>
+                <input
+                  type="password"
+                  placeholder="Example123"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              <div className="input-wrapper">
+                <p>Confirm Password</p>
+                <input
+                  type="password"
+                  placeholder="Example123"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+
+              <button type="submit" className="btn">
+                {loading ? `loading...` : ` Sign Up with Email and Password`}
+              </button>
+              <p style={{ textAlign: "center" }}>or</p>
+              <button disabled={loading} type="submit" className="btn">
+                {loading ? `loading...` : `  Sign Up with Google `}
+              </button>
+            </form>
+            <p
+              onClick={() => setlogin(!login)}
+              style={{
+                textAlign: "center",
+                marginBottom: 0,
+                marginTop: "0.5rem",
+                cursor: "pointer",
+              }}
+            >
+              Alrady have an account ? Click Here.
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 };
