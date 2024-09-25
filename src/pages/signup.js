@@ -1,8 +1,15 @@
 import React, { useState } from "react";
 import Header from "../components/Header";
 import { toast } from "react-toastify";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db, doc } from "../firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { auth, db, provider, doc, setDoc } from "../firebase";
+
+import { Await, useNavigate } from "react-router-dom";
+import { getDoc } from "firebase/firestore";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 const SignUpSignIn = () => {
   const [name, setName] = useState("");
@@ -73,21 +80,100 @@ const SignUpSignIn = () => {
           setEmail("");
           setName("");
           setPassword("");
-          crateDoc(user.uid);
+          createDoc(user);
         })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
           setLoading(false);
-
           toast.error(errorMessage);
         });
     }
   };
 
-  const signInWithEmail = async (e) => {};
+  const signInWithEmail = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-  function crateDoc(uid) {}
+    const errors = validateForm(name, email, password, confirmPassword);
+    if (Object.keys(errors) > 0) {
+      setLoading(false);
+
+      for (let key of Object.keys(errors)) {
+        toast.error(errors[key]);
+      }
+    } else {
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          setLoading(false);
+          toast.success("User Loged In");
+          console.log("User log in ", user);
+          setConfirmPassword("");
+          setEmail("");
+          setName("");
+          setPassword("");
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setLoading(false);
+          toast.error(errorMessage);
+        });
+    }
+  };
+
+  async function createDoc(user) {
+    const userRef = doc(db, "user", user.uid);
+    const userData = await getDoc(userRef);
+
+    if (!userData.exists()) {
+      const { displayName, email, photoURL } = user;
+      const createdAt = new Date();
+
+      try {
+        await setDoc(userRef, {
+          name: user.displayName ? user.displayName : displayName,
+          email: user.email ? user.email : email,
+          photoURL: user.photoURL ? user.photoURL : photoURL,
+          createdAt: createdAt,
+        });
+        toast.success("Doc Created!");
+        setLoading(false);
+      } catch (error) {
+        toast.error(error.message);
+        console.error("Error creating user document: ", error);
+        setLoading(false);
+      }
+    }
+  }
+
+  function googleAuth(e) {
+    e.preventDefault();
+    setlogin(true);
+
+    try {
+      signInWithPopup(auth, provider)
+      .then((result) => {
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        const user = result.user;
+        console.log("user>>" , user)
+        toast.success("User Aunthicated")
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        toast.error(errorMessage);
+        const email = error.customData.email;
+        const credential = GoogleAuthProvider.credentialFromError(error);
+      });
+    } catch (error) {
+      toast.error(error.message);
+    }
+
+  
+  }
 
   return (
     <>
@@ -124,7 +210,12 @@ const SignUpSignIn = () => {
                 {loading ? `loading...` : ` Sign In with Email and Password`}
               </button>
               <p style={{ textAlign: "center" }}>or</p>
-              <button disabled={loading} type="submit" className="btn">
+              <button
+                onClick={googleAuth}
+                disabled={loading}
+                type="submit"
+                className="btn"
+              >
                 {loading ? `loading...` : `  Sign In with Google `}
               </button>
             </form>
@@ -191,7 +282,12 @@ const SignUpSignIn = () => {
                 {loading ? `loading...` : ` Sign Up with Email and Password`}
               </button>
               <p style={{ textAlign: "center" }}>or</p>
-              <button disabled={loading} type="submit" className="btn">
+              <button
+                onClick={googleAuth}
+                disabled={loading}
+                type="submit"
+                className="btn"
+              >
                 {loading ? `loading...` : `  Sign Up with Google `}
               </button>
             </form>
