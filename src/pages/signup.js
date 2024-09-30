@@ -7,7 +7,7 @@ import {
 } from "firebase/auth";
 import { auth, db, provider, doc, setDoc } from "../firebase";
 
-import { Await, useNavigate } from "react-router-dom";
+import { Await, Navigate, useNavigate } from "react-router-dom";
 import { getDoc } from "firebase/firestore";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
@@ -19,6 +19,7 @@ const SignUpSignIn = () => {
 
   const [login, setlogin] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const validateForm = (name, email, password, confirmPassword) => {
     const errors = {};
@@ -113,6 +114,7 @@ const SignUpSignIn = () => {
           setEmail("");
           setName("");
           setPassword("");
+          navigate("/dashboard");
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -148,7 +150,7 @@ const SignUpSignIn = () => {
     }
   }
 
-  function googleAuth(e) {
+  const googleAuth = async (e) => {
     e.preventDefault();
     setlogin(true);
 
@@ -159,7 +161,9 @@ const SignUpSignIn = () => {
         const token = credential.accessToken;
         const user = result.user;
         console.log("user>>" , user)
-        toast.success("User Aunthicated")
+        toast.success("User Aunthicated");
+        createDoc(user);
+        navigate("/dashboard");
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -171,8 +175,6 @@ const SignUpSignIn = () => {
     } catch (error) {
       toast.error(error.message);
     }
-
-  
   }
 
   return (

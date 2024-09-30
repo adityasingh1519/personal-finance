@@ -1,0 +1,13 @@
+.my-card {
+    box-shadow: var( --box-shadow);
+    min-width: 30vw;
+}
+
+.my-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem;
+    flex-wrap: wrap;
+    gap: 16px;
+}
