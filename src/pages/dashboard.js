@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import Header from "../components/Header";
 import Cards from "../components/Card";
-import { Modal } from "antd";
+import AddExpence from "../components/Modals/addExpence";
+import AddIncomeModal from "../components/Modals/addIncome";
+import moment from "moment";
+
+
 
 function Dashboard() {
   const [isExpenseModalVisisble, setisExpenseModalVisisble] = useState(false);
@@ -23,6 +27,28 @@ function Dashboard() {
     setisIncomeModalVisisble(false);
   };
 
+   const  onFinish = (values, type) => {
+    console.log("on finish ", values, type);
+     const  newTransaction = {
+      type: type,
+      Date : moment(values.date).format('YYYY-MM-DD'),
+      name: values.name,
+      tag : values.tag,
+      amount : parseFloat(values.amount)
+     }
+
+
+     addTransaction(newTransaction);
+
+     async function addTransaction(transaction, many) {
+      try {
+       
+      } catch (e) {
+      
+      }
+    }
+  };
+
   return (
     <>
       <Header />
@@ -31,21 +57,17 @@ function Dashboard() {
         showIncomeModal={showIncomeModal}
       />
 
-      <Modal
-        title="Expense Modal"
-        open={isExpenseModalVisisble}
-        onCancel={hideExpenseModal}
-      >
-        <p>Expense</p>
-      </Modal>
+      <AddExpence
+        isExpenseModalVisisble={isExpenseModalVisisble}
+        hideExpenseModal={hideExpenseModal}
+        onFinish={onFinish}
+      ></AddExpence>
 
-      <Modal
-        title="Income Modal"
-        open={isIncomeModalVisisble}
-        onCancel={hideIncomeModal}
-      >
-        <p>Income</p>
-      </Modal>
+      <AddIncomeModal
+        isIncomeModalVisisble={isIncomeModalVisisble}
+        hideIncomeModal={hideIncomeModal}
+        onFinish={onFinish}
+      ></AddIncomeModal>
     </>
   );
 }
