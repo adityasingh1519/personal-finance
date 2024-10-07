@@ -1,15 +1,27 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Cards from "../components/Card";
 import AddExpence from "../components/Modals/addExpence";
 import AddIncomeModal from "../components/Modals/addIncome";
 import moment from "moment";
-
-
+import { addDoc, collection, getDocs, query } from "firebase/firestore";
+import { auth, db } from "../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { toast } from "react-toastify";
+import TransactionTable from "../components/TransactionTable";
 
 function Dashboard() {
   const [isExpenseModalVisisble, setisExpenseModalVisisble] = useState(false);
   const [isIncomeModalVisisble, setisIncomeModalVisisble] = useState(false);
+
+  const [transactions, setTransactions] = useState([]);
+  const [user] = useAuthState(auth);
+
+  const [loading, setloading] = useState([]);
+
+  const [currentBalance, setCurrentBalance] = useState(0);
+  const [income, setIncome] = useState(0);
+  const [expenses, setExpenses] = useState(0);
 
   const showExpenseModal = () => {
     setisExpenseModalVisisble(true);
@@ -27,47 +39,107 @@ function Dashboard() {
     setisIncomeModalVisisble(false);
   };
 
-   const  onFinish = (values, type) => {
+  const onFinish = (values, type) => {
     console.log("on finish ", values, type);
-     const  newTransaction = {
+    const newTransaction = {
       type: type,
-      Date : moment(values.date).format('YYYY-MM-DD'),
+      Date: moment(values.date).format("YYYY-MM-DD"),
       name: values.name,
-      tag : values.tag,
-      amount : parseFloat(values.amount)
-     }
+      tag: values.tag,
+      amount: parseFloat(values.amount),
+    };
 
-
-     addTransaction(newTransaction);
-
-     async function addTransaction(transaction, many) {
-      try {
-       
-      } catch (e) {
-      
-      }
-    }
+    setTransactions([...transactions, newTransaction]);
+    addTransaction(newTransaction);
   };
+
+  useEffect(() => {
+    fetchTransaction();
+  }, []);
+
+  useEffect(() => {
+    calculateBalance();
+  }, [transactions]);
+
+  const calculateBalance = () => {
+    let incomeTotal = 0;
+    let expensesTotal = 0;
+
+    transactions.forEach((transaction) => {
+      if (transaction.type === "income") {
+        incomeTotal += transaction.amount;
+      } else {
+        expensesTotal += transaction.amount;
+      }
+    });
+
+    setIncome(incomeTotal);
+    setExpenses(expensesTotal);
+    setCurrentBalance(incomeTotal - expensesTotal);
+  };
+
+  async function fetchTransaction() {
+    setloading(true);
+    if (user) {
+      const q = query(collection(db, `user/${user.uid}/transactions`));
+      const querySnapshot = await getDocs(q);
+      let transactionsArray = [];
+      querySnapshot.forEach((doc) => {
+        transactionsArray.push(doc.data());
+      });
+      setTransactions(transactionsArray);
+      console.log(transactionsArray);
+      toast.success("Transactions Fetched!");
+    }
+    setloading(false);
+  }
+
+  async function addTransaction(transaction) {
+    try {
+      const docRef = await addDoc(
+        collection(db, `user/${user.uid}/transactions`),
+        transaction
+      );
+      console.log("Document written with ID: ", docRef.id);
+      toast.success("Transaction Added!");
+    } catch (e) {
+      toast.error("Couldn't add transaction");
+      console.log(e.message);
+    }
+  }
 
   return (
     <>
       <Header />
-      <Cards
-        showExpenseModal={showExpenseModal}
-        showIncomeModal={showIncomeModal}
-      />
 
-      <AddExpence
-        isExpenseModalVisisble={isExpenseModalVisisble}
-        hideExpenseModal={hideExpenseModal}
-        onFinish={onFinish}
-      ></AddExpence>
+      {loading ? (
+        <p> loading </p>
+      ) : (
+        <>
+          <Cards
+            currentBalance={currentBalance}
+            income={income}
+            expenses={expenses}
+            showExpenseModal={showExpenseModal}
+            showIncomeModal={showIncomeModal}
+          />
 
-      <AddIncomeModal
-        isIncomeModalVisisble={isIncomeModalVisisble}
-        hideIncomeModal={hideIncomeModal}
-        onFinish={onFinish}
-      ></AddIncomeModal>
+          <AddExpence
+            isExpenseModalVisisble={isExpenseModalVisisble}
+            hideExpenseModal={hideExpenseModal}
+            onFinish={onFinish}
+          ></AddExpence>
+
+          <AddIncomeModal
+            isIncomeModalVisisble={isIncomeModalVisisble}
+            hideIncomeModal={hideIncomeModal}
+            onFinish={onFinish}
+          ></AddIncomeModal>
+          
+          <TransactionTable transactions ={ transactions} />
+          
+        </>
+      )}
     </>
   );
 }
