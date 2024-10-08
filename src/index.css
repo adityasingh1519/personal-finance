@@ -21,6 +21,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    z-index: 9999;
   }
   
   .navbar-heading {
@@ -39,4 +40,13 @@
   .navbar-link:hover {
     color: #fff;
     transition: all 0.3s;
+  }
+
+  .d-flex {
+    display: flex;
+  }
+
+  .my-2 {
+    margin-top: .6rem;
+    margin-bottom: .6rem;
   }

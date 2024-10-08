@@ -9,6 +9,7 @@ import { auth, db } from "../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { toast } from "react-toastify";
 import TransactionTable from "../components/TransactionTable";
+import { unparse } from "papaparse";
 
 function Dashboard() {
   const [isExpenseModalVisisble, setisExpenseModalVisisble] = useState(false);
@@ -43,7 +44,7 @@ function Dashboard() {
     console.log("on finish ", values, type);
     const newTransaction = {
       type: type,
-      Date: moment(values.date).format("YYYY-MM-DD"),
+      Date: values.date.format("YYYY-MM-DD"),
       name: values.name,
       tag: values.tag,
       amount: parseFloat(values.amount),
@@ -55,7 +56,7 @@ function Dashboard() {
 
   useEffect(() => {
     fetchTransaction();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     calculateBalance();
@@ -108,6 +109,18 @@ function Dashboard() {
     }
   }
 
+  function exportToCsv() {
+    const csv = unparse({
+      fields: ["name", "type", "tag", "Date", "amount"],
+      transactions,
+    });
+
+    const blob = new Blob([csv], { type: "text/csv; charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+  }
+
   return (
     <>
       <Header />
@@ -135,9 +148,10 @@ function Dashboard() {
             hideIncomeModal={hideIncomeModal}
             onFinish={onFinish}
           ></AddIncomeModal>
-          
-          <TransactionTable transactions ={ transactions} />
-          
+
+          <div style={{ margin: "2rem" }}>
+            <TransactionTable transactions={transactions} />
+          </div>
         </>
       )}
     </>
