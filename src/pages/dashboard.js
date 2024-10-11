@@ -112,13 +112,15 @@ function Dashboard() {
   function exportToCsv() {
     const csv = unparse({
       fields: ["name", "type", "tag", "Date", "amount"],
-      transactions,
+      data: transactions,
     });
 
     const blob = new Blob([csv], { type: "text/csv; charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
+    link.setAttribute("download","transactions.csv");
+    link.click();
   }
 
   return (
@@ -150,7 +152,7 @@ function Dashboard() {
           ></AddIncomeModal>
 
           <div style={{ margin: "2rem" }}>
-            <TransactionTable transactions={transactions} />
+            <TransactionTable exportToCsv={exportToCsv} transactions={transactions} />
           </div>
         </>
       )}
