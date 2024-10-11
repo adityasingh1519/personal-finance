@@ -95,16 +95,21 @@ function Dashboard() {
     setloading(false);
   }
 
-  async function addTransaction(transaction) {
+  async function addTransaction(transaction, many) {
     try {
       const docRef = await addDoc(
         collection(db, `user/${user.uid}/transactions`),
         transaction
       );
       console.log("Document written with ID: ", docRef.id);
-      toast.success("Transaction Added!");
+      if (!many) {
+        toast.success("Transaction Added!");
+      }
     } catch (e) {
-      toast.error("Couldn't add transaction");
+      console.error("Error adding document: ", e);
+      if (!many) {
+        toast.error("Couldn't add transaction");
+      }
       console.log(e.message);
     }
   }
@@ -117,9 +122,9 @@ function Dashboard() {
 
     const blob = new Blob([csv], { type: "text/csv; charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download","transactions.csv");
+    link.setAttribute("download", "transactions.csv");
     link.click();
   }
 
@@ -152,7 +157,12 @@ function Dashboard() {
           ></AddIncomeModal>
 
           <div style={{ margin: "2rem" }}>
-            <TransactionTable exportToCsv={exportToCsv} transactions={transactions} />
+            <TransactionTable
+              exportToCsv={exportToCsv}
+              transactions={transactions}
+              addTransaction={addTransaction}
+              fetchTransaction={fetchTransaction}
+            />
           </div>
         </>
       )}

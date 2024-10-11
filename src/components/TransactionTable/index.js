@@ -1,9 +1,16 @@
 import { Table, Select, Radio } from "antd";
 import React, { useState } from "react";
 import "./style.css";
+import { parse } from "papaparse";
+import { toast } from "react-toastify";
 const { Option } = Select;
 
-function TransactionTable({ transactions , exportToCsv }) {
+function TransactionTable({
+  transactions,
+  exportToCsv,
+  addTransaction,
+  fetchTransaction,
+}) {
   const column = [
     {
       title: "Name",
@@ -34,6 +41,7 @@ function TransactionTable({ transactions , exportToCsv }) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [sortKey, setSortKey] = useState("");
+  const [importedFile, setImportedFile] = useState(null);
 
   const filteredTransactions = transactions.filter(
     (item) =>
@@ -50,7 +58,32 @@ function TransactionTable({ transactions , exportToCsv }) {
       return 0;
     }
   });
-  function importFromCsv(event) { }
+  function importFromCsv(event) {
+    event.preventDefault();
+    setImportedFile(event.target.files[0]);
+    try {
+      parse(importedFile, {
+        header: true,
+        complete: async function (results) {
+          for (const transaction of results.data) {
+            console.log("Transactions", transaction);
+            const newImpotedTransaction = {
+              ...transaction,
+              amount: parseInt(transaction.amount),
+            };
+
+            await addTransaction(newImpotedTransaction, true);
+          }
+          console.log("Parsing complete:", results);
+          toast.success("All Transactions Added");
+          event.target.files = null;
+          fetchTransaction();
+        },
+      });
+    } catch (e) {
+      toast.error(e.message);
+    }
+  }
 
   return (
     <>
